@@ -1,93 +1,57 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+
 import MainLayout from "./components/layout/MainLayout";
-import Button from "./components/common/Button";
-import Card from "./components/common/Card";
-import Badge from "./components/common/Badge";
+
+import Dashboard from "./pages/dashboard/Dashboard";
+import P2PMarketplace from "./pages/p2p/P2PMarketplace";
+import Orders from "./pages/orders/Orders";
+import Wallet from "./pages/wallet/Wallet";
+import Transactions from "./pages/transactions/Transactions"
+import Profile from "./pages/profile/Profile";
+import Settings from "./pages/settings/Settings"
 
 function App() {
   return (
-    <MainLayout>
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <p className="text-sm font-medium text-blue-600">
-            Welcome back
-          </p>
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Dashboard />} />
 
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">
-            Dashboard
-          </h1>
+        <Route
+          path="/p2p"
+          element={<P2PMarketplace />}
+        />
 
-          <p className="mt-1 text-sm text-slate-500">
-            Manage your crypto assets and P2P trades.
-          </p>
-        </div>
+        <Route
+          path="/orders"
+          element={<Orders />}
+        />
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="p-6">
-            <p className="text-sm text-slate-500">
-              Total Balance
-            </p>
+        <Route
+          path="/wallet"
+          element={<Wallet />}
+        />
 
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">
-              ₦0.00
-            </h2>
+        <Route
+          path="/transactions"
+          element={<Transactions />}
+        />
 
-            <p className="mt-2 text-xs text-slate-400">
-              Nigerian Naira
-            </p>
-          </Card>
+        <Route
+          path="/profile"
+          element={<Profile />}
+        />
 
-          <Card className="p-6">
-            <p className="text-sm text-slate-500">
-              BTC Balance
-            </p>
+        <Route
+          path="/settings"
+          element={<Settings />}
+        />
 
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">
-              0.000000 BTC
-            </h2>
-
-            <Badge variant="info">
-              Bitcoin
-            </Badge>
-          </Card>
-
-          <Card className="p-6">
-            <p className="text-sm text-slate-500">
-              Account Status
-            </p>
-
-            <div className="mt-3">
-              <Badge variant="success">
-                Verified
-              </Badge>
-            </div>
-
-            <p className="mt-2 text-xs text-slate-400">
-              Your account is ready for trading.
-            </p>
-          </Card>
-        </div>
-
-        <Card className="mt-6 p-6">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Quick Actions
-          </h2>
-
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Button>
-              Buy Crypto
-            </Button>
-
-            <Button variant="outline">
-              Sell Crypto
-            </Button>
-
-            <Button variant="secondary">
-              View Wallet
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </MainLayout>
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
+      </Route>
+    </Routes>
   );
 }
 

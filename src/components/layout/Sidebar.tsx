@@ -9,6 +9,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -20,23 +21,27 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
     {
       label: "Dashboard",
       icon: LayoutDashboard,
-      active: true,
+      path: "/",
     },
     {
       label: "P2P Marketplace",
       icon: CircleDollarSign,
+      path: "/p2p",
     },
     {
       label: "Orders",
       icon: ArrowLeftRight,
+      path: "/orders",
     },
     {
       label: "Wallet",
       icon: Wallet,
+      path: "/wallet",
     },
     {
       label: "Transactions",
       icon: BarChart3,
+      path: "/transactions",
     },
   ];
 
@@ -57,7 +62,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         }`}
       >
         <div className="flex h-full flex-col">
-          
+
+          {/* Mobile Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 lg:hidden">
             <span className="font-semibold text-slate-900">
               Menu
@@ -66,11 +72,13 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
             <button
               onClick={onClose}
               className="rounded-lg p-2 hover:bg-slate-100"
+              aria-label="Close menu"
             >
               <X size={20} />
             </button>
           </div>
 
+          {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
             <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Main Menu
@@ -80,21 +88,33 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               const Icon = item.icon;
 
               return (
-                <button
+                <NavLink
                   key={item.label}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
-                    item.active
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
+                  to={item.path}
+                  onClick={onClose}
+                  end={item.path === "/"}
+                  className={({ isActive }) =>
+                    `flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }`
+                  }
                 >
-                  <span className="flex items-center gap-3">
-                    <Icon size={19} />
-                    {item.label}
-                  </span>
+                  {({ isActive }) => (
+                    <>
+                      <span className="flex items-center gap-3">
+                        <Icon size={19} />
 
-                  {item.active && <ChevronRight size={16} />}
-                </button>
+                        {item.label}
+                      </span>
+
+                      {isActive && (
+                        <ChevronRight size={16} />
+                      )}
+                    </>
+                  )}
+                </NavLink>
               );
             })}
 
@@ -104,17 +124,38 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               Account
             </p>
 
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <NavLink
+              to="/security"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
               <ShieldCheck size={19} />
               Security
-            </button>
+            </NavLink>
 
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <NavLink
+              to="/settings"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
               <Settings size={19} />
               Settings
-            </button>
+            </NavLink>
           </nav>
 
+          {/* Support */}
           <div className="border-t border-slate-200 p-4">
             <div className="rounded-xl bg-slate-900 p-4 text-white">
               <p className="text-sm font-semibold">
