@@ -9,6 +9,7 @@ import Wallet from "./pages/wallet/Wallet";
 import Transactions from "./pages/transactions/Transactions"
 import Profile from "./pages/profile/Profile";
 import Settings from "./pages/settings/Settings"
+import Security from "./pages/settings/Security";
 
 function App() {
   return (
@@ -39,6 +40,10 @@ function App() {
         <Route
           path="/profile"
           element={<Profile />}
+        />
+        <Route
+          path="/settings/security"
+          element={<Security />}
         />
 
         <Route
