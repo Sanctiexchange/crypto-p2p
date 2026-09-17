@@ -3,13 +3,16 @@ import {
   BarChart3,
   ChevronRight,
   CircleDollarSign,
+  CreditCard,
   LayoutDashboard,
+  Megaphone,
   Settings,
   ShieldCheck,
+  ShoppingBag,
   Wallet,
   X,
-  CreditCard,
 } from "lucide-react";
+
 import { NavLink } from "react-router-dom";
 
 interface SidebarProps {
@@ -17,7 +20,10 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-function Sidebar({ isOpen, onClose }: SidebarProps) {
+function Sidebar({
+  isOpen,
+  onClose,
+}: SidebarProps) {
   const menuItems = [
     {
       label: "Dashboard",
@@ -48,6 +54,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile overlay */}
       {isOpen && (
         <div
           onClick={onClose}
@@ -80,7 +87,9 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
+          <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+
+            {/* Main Menu */}
             <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Main Menu
             </p>
@@ -106,7 +115,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <>
                       <span className="flex items-center gap-3">
                         <Icon size={19} />
-
                         {item.label}
                       </span>
 
@@ -119,26 +127,110 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               );
             })}
 
+            {/* Merchant */}
+            <div className="my-5 border-t border-slate-100" />
+
+            <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Merchant
+            </p>
+
+            <NavLink
+              to="/merchant"
+              onClick={onClose}
+              end
+              className={({ isActive }) =>
+                `flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className="flex items-center gap-3">
+                    <ShoppingBag size={19} />
+                    Merchant Dashboard
+                  </span>
+
+                  {isActive && (
+                    <ChevronRight size={16} />
+                  )}
+                </>
+              )}
+            </NavLink>
+
+            <NavLink
+              to="/merchant/ads"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className="flex items-center gap-3">
+                    <Megaphone size={19} />
+                    My Advertisements
+                  </span>
+
+                  {isActive && (
+                    <ChevronRight size={16} />
+                  )}
+                </>
+              )}
+            </NavLink>
+
+            <NavLink
+              to="/merchant/orders"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className="flex items-center gap-3">
+                    <ShoppingBag size={19} />
+                    Merchant Orders
+                  </span>
+
+                  {isActive && (
+                    <ChevronRight size={16} />
+                  )}
+                </>
+              )}
+            </NavLink>
+
+            {/* Account */}
             <div className="my-5 border-t border-slate-100" />
 
             <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Account
             </p>
 
-             <NavLink
-                   to="/payment-methods"
-                   onClick={onClose}
-                   className={({ isActive }) =>
-                   `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
-              isActive
-                  ? "bg-blue-50 text-blue-600"
-                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            <NavLink
+              to="/settings/payment-methods"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`
-             }
+              }
             >
-  <CreditCard size={19} />
-  Payment Methods
-</NavLink> 
+              <CreditCard size={19} />
+              Payment Methods
+            </NavLink>
 
             <NavLink
               to="/security"
