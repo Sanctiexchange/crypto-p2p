@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CheckCircle2,
   ChevronDown,
@@ -21,6 +22,7 @@ import type { CryptoSymbol } from "../../types/crypto.types";
 import type { TradeType } from "../../types/p2p.types";
 
 function P2PMarketplace() {
+  const navigate = useNavigate();
   const [tradeType, setTradeType] =
     useState<TradeType>("buy");
 
@@ -491,10 +493,13 @@ const matchesAmount =
                   {/* ACTION */}
                   <div className="lg:text-right">
                     <Button
-                      type="button"
-                      size="md"
-                      className="w-full lg:min-w-28 lg:w-auto"
-                    >
+                         type="button"
+                          size="md"
+                          onClick={() =>
+                          navigate(`/p2p/offer/${offer.id}`)
+                                  }
+                          className="w-full lg:min-w-28 lg:w-auto"
+                      >
                       {tradeType === "buy"
                         ? "Buy"
                         : "Sell"}{" "}

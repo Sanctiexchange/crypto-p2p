@@ -314,12 +314,22 @@ function OfferDetails() {
 
           {/* CONTINUE */}
           <Button
-            size="lg"
-            disabled={!isWithinLimits}
-            className="mt-5 w-full"
-          >
-            Continue to Trade
-          </Button>
+                 size="lg"
+                disabled={!isWithinLimits}
+                onClick={() =>
+                navigate(
+                 `/p2p/offer/${offer.id}/review`,
+                 {
+                    state: {
+          amount: tradeAmount,
+        },
+      },
+    )
+  }
+  className="mt-5 w-full"
+>
+  Continue to Trade
+</Button>
         </Card>
       </div>
 

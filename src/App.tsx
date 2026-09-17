@@ -11,6 +11,7 @@ import Profile from "./pages/profile/Profile";
 import Settings from "./pages/settings/Settings"
 import Security from "./pages/settings/Security";
 import OfferDetails from "./pages/P2P/OfferDetails";
+import TradeReview from "./pages/P2P/TradeReview";
 
 function App() {
   return (
@@ -57,6 +58,11 @@ function App() {
           path="/p2p/offer/:offerId"
           element={<OfferDetails />}
         />
+        <Route
+             path="/p2p/offer/:offerId/review"
+             element={<TradeReview />}
+        />
+
         <Route
           path="*"
           element={<Navigate to="/" replace />}
