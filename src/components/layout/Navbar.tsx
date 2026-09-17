@@ -4,12 +4,14 @@ import {
   Menu,
   ShieldCheck,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
   onMenuClick?: () => void;
 }
 
 function Navbar({ onMenuClick }: NavbarProps) {
+  const navigate = useNavigate();
   return (
     <header className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-slate-200 bg-white">
       <div className="flex h-full items-center justify-between px-4 lg:px-6">
@@ -42,11 +44,16 @@ function Navbar({ onMenuClick }: NavbarProps) {
             <span>Secure</span>
           </div>
 
-          <button className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100">
+          <button
+              type="button"
+              onClick={() => navigate("/notifications")}
+              className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+              aria-label="Notifications"
+          >
             <Bell size={21} />
 
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-          </button>
+          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
+        </button>
 
           <button className="flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-100">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">

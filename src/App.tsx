@@ -18,6 +18,7 @@ import Profile from "./pages/profile/Profile";
 import Settings from "./pages/settings/Settings";
 import Security from "./pages/settings/Security";
 import PaymentMethods from "./pages/settings/PaymentMethods";
+import Notifications from "./pages/notifications/Notifications";
 
 function App() {
   return (
@@ -87,6 +88,12 @@ function App() {
         <Route
           path="/settings/payment-methods"
           element={<PaymentMethods />}
+        />
+
+        {/* Notifications */}
+        <Route
+          path="/notifications"
+          element={<Notifications />}
         />
 
         {/* Unknown routes */}
