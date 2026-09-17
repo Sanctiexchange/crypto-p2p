@@ -19,6 +19,7 @@ import Settings from "./pages/settings/Settings";
 import Security from "./pages/settings/Security";
 import PaymentMethods from "./pages/settings/PaymentMethods";
 import Notifications from "./pages/notifications/Notifications";
+import MerchantDashboard from "./pages/merchant/MerchantDashboard";
 
 function App() {
   return (
@@ -73,6 +74,12 @@ function App() {
         <Route
           path="/profile"
           element={<Profile />}
+        />
+
+        {/* Merchant Dashboard */}
+        <Route
+          path="/merchant"
+          element={<MerchantDashboard />}
         />
 
         <Route
