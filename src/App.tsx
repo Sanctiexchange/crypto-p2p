@@ -107,7 +107,7 @@ function App() {
           element={<MerchantOrders />}
         />
 
-        {/* Admin */}
+        {/* Admin Dashboard */}
         <Route
              path="/admin"
               element={<AdminDashboard />}
