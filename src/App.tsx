@@ -10,6 +10,7 @@ import Transactions from "./pages/transactions/Transactions";
 import Profile from "./pages/profile/Profile";
 import Settings from "./pages/settings/Settings"
 import Security from "./pages/settings/Security";
+import OfferDetails from "./pages/P2P/OfferDetails";
 
 function App() {
   return (
@@ -51,6 +52,11 @@ function App() {
           element={<Settings />}
         />
 
+
+        <Route
+          path="/p2p/offer/:offerId"
+          element={<OfferDetails />}
+        />
         <Route
           path="*"
           element={<Navigate to="/" replace />}

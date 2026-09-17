@@ -15,21 +15,45 @@ import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 
 import { p2pOffers } from "../../data/p2pOffers";
+import { sellOffers } from "../../data/sellOffers";
 
 import type { CryptoSymbol } from "../../types/crypto.types";
 import type { TradeType } from "../../types/p2p.types";
 
 function P2PMarketplace() {
-  const [tradeType, setTradeType] = useState<TradeType>("buy");
+  const [tradeType, setTradeType] =
+    useState<TradeType>("buy");
+
   const [selectedCrypto, setSelectedCrypto] =
     useState<CryptoSymbol>("BTC");
 
-  const [showFilters, setShowFilters] = useState(false);
-  const [paymentFilter, setPaymentFilter] = useState("All");
+  const [showFilters, setShowFilters] =
+    useState(false);
+
+  const [paymentFilter, setPaymentFilter] =
+    useState("All");
+
   const [search, setSearch] = useState("");
 
+  const [tradeAmount, setTradeAmount] =
+  useState("");
+
+  /*
+   * Combine our Buy and Sell marketplace data.
+   *
+   * Later this can easily be replaced by
+   * data returned from our backend/API.
+   */
+  const allOffers = useMemo(() => {
+    return [...p2pOffers, ...sellOffers];
+  }, []);
+
+  /*
+   * Filter offers according to the user's
+   * current marketplace selections.
+   */
   const filteredOffers = useMemo(() => {
-    return p2pOffers.filter((offer) => {
+    return allOffers.filter((offer) => {
       const matchesTradeType =
         offer.tradeType === tradeType;
 
@@ -46,24 +70,48 @@ function P2PMarketplace() {
       const matchesSearch =
         offer.trader.displayName
           .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        offer.trader.username
+          .toLowerCase()
           .includes(search.toLowerCase());
+
+const amount = Number(tradeAmount);
+
+const matchesAmount =
+  !tradeAmount ||
+  (amount >= offer.minimumAmount &&
+    amount <= offer.maximumAmount);
+
+      const matchesStatus =
+        offer.status === "active";
 
       return (
         matchesTradeType &&
         matchesCrypto &&
         matchesPayment &&
-        matchesSearch
+        matchesSearch &&
+        matchesAmount &&
+        matchesStatus 
       );
     });
   }, [
+    allOffers,
     tradeType,
     selectedCrypto,
     paymentFilter,
     search,
+    tradeAmount,
   ]);
 
-  const formatNaira = (amount: number) =>
-    `₦${amount.toLocaleString("en-NG")}`;
+  const formatNaira = (amount: number) => {
+    return `₦${amount.toLocaleString("en-NG")}`;
+  };
+
+  const clearFilters = () => {
+  setPaymentFilter("All");
+  setSearch("");
+  setTradeAmount("");
+};
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -91,7 +139,7 @@ function P2PMarketplace() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
+          <div className="flex w-fit items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
             <span className="h-2 w-2 rounded-full bg-green-500" />
 
             <span className="text-xs font-semibold text-green-700">
@@ -101,12 +149,13 @@ function P2PMarketplace() {
         </div>
       </div>
 
-      {/* MAIN CONTROL CARD */}
+      {/* MAIN MARKETPLACE CARD */}
       <Card className="mb-6 overflow-hidden">
         {/* BUY / SELL TABS */}
         <div className="border-b border-slate-200 px-4 pt-4 sm:px-6">
           <div className="flex gap-6">
             <button
+              type="button"
               onClick={() => setTradeType("buy")}
               className={`relative pb-4 text-sm font-semibold transition ${
                 tradeType === "buy"
@@ -122,6 +171,7 @@ function P2PMarketplace() {
             </button>
 
             <button
+              type="button"
               onClick={() => setTradeType("sell")}
               className={`relative pb-4 text-sm font-semibold transition ${
                 tradeType === "sell"
@@ -138,11 +188,29 @@ function P2PMarketplace() {
           </div>
         </div>
 
+{/* AMOUNT */}
+<div>
+  <label className="mb-1.5 block text-xs font-medium text-slate-500">
+    Amount (NGN)
+  </label>
+
+  <input
+    type="number"
+    min="0"
+    placeholder="Enter amount"
+    value={tradeAmount}
+    onChange={(event) =>
+      setTradeAmount(event.target.value)
+    }
+    className="h-10.5 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-500"
+  />
+</div>
+
         {/* FILTER BAR */}
         <div className="p-4 sm:p-6">
-          <div className="grid gap-3 md:grid-cols-[180px_180px_1fr_auto]">
-            {/* CRYPTO SELECTOR */}
-            <div className="relative">
+          <div className="grid gap-3 md:grid-cols-[170px_170px_1fr_180px_auto]">
+            {/* CRYPTO */}
+            <div>
               <label className="mb-1.5 block text-xs font-medium text-slate-500">
                 Crypto
               </label>
@@ -150,12 +218,12 @@ function P2PMarketplace() {
               <div className="relative">
                 <select
                   value={selectedCrypto}
-                  onChange={(e) =>
+                  onChange={(event) =>
                     setSelectedCrypto(
-                      e.target.value as CryptoSymbol,
+                      event.target.value as CryptoSymbol,
                     )
                   }
-                  className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500"
+                  className="h-10.5 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500"
                 >
                   <option value="BTC">
                     ₿ Bitcoin (BTC)
@@ -181,13 +249,13 @@ function P2PMarketplace() {
               </div>
             </div>
 
-            {/* CURRENCY */}
+            {/* FIAT */}
             <div>
               <label className="mb-1.5 block text-xs font-medium text-slate-500">
                 Fiat Currency
               </label>
 
-              <div className="flex h-[42px] items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700">
+              <div className="flex h-10.5 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700">
                 🇳🇬 NGN — Nigerian Naira
               </div>
             </div>
@@ -206,24 +274,25 @@ function P2PMarketplace() {
 
                 <input
                   type="text"
-                  placeholder="Search trader..."
                   value={search}
-                  onChange={(e) =>
-                    setSearch(e.target.value)
+                  onChange={(event) =>
+                    setSearch(event.target.value)
                   }
-                  className="h-[42px] w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500"
+                  placeholder="Search trader..."
+                  className="h-10.5 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500"
                 />
               </div>
             </div>
 
-            {/* FILTER BUTTON */}
+            {/* FILTER */}
             <div className="flex items-end">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() =>
                   setShowFilters(!showFilters)
                 }
-                className="h-[42px] w-full md:w-auto"
+                className="h-10.5 w-full md:w-auto"
               >
                 <Filter size={16} className="mr-2" />
                 Filters
@@ -242,8 +311,8 @@ function P2PMarketplace() {
 
                   <select
                     value={paymentFilter}
-                    onChange={(e) =>
-                      setPaymentFilter(e.target.value)
+                    onChange={(event) =>
+                      setPaymentFilter(event.target.value)
                     }
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500"
                   >
@@ -270,10 +339,8 @@ function P2PMarketplace() {
                 </div>
 
                 <button
-                  onClick={() => {
-                    setPaymentFilter("All");
-                    setSearch("");
-                  }}
+                  type="button"
+                  onClick={clearFilters}
                   className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-red-500"
                 >
                   <X size={15} />
@@ -285,7 +352,7 @@ function P2PMarketplace() {
         </div>
       </Card>
 
-      {/* MARKETPLACE SUMMARY */}
+      {/* RESULTS HEADER */}
       <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-lg font-bold text-slate-900">
@@ -295,17 +362,20 @@ function P2PMarketplace() {
           </h2>
 
           <p className="text-sm text-slate-500">
-            {filteredOffers.length} offers available
+            {filteredOffers.length} active offers available
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Clock3 size={15} />
-          Prices shown are demo marketplace data
+
+          <span>
+            Prices shown are demo marketplace data
+          </span>
         </div>
       </div>
 
-      {/* OFFER LIST */}
+      {/* OFFERS */}
       <div className="space-y-4">
         {filteredOffers.length === 0 ? (
           <Card className="p-10 text-center">
@@ -321,7 +391,7 @@ function P2PMarketplace() {
             </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              Try changing your filters or search.
+              Try changing your crypto or payment filters.
             </p>
           </Card>
         ) : (
@@ -366,13 +436,14 @@ function P2PMarketplace() {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       <Badge variant="success">
                         {`${offer.trader.completionRate}% completion`}
                       </Badge>
 
                       <span className="flex items-center gap-1 text-xs text-slate-500">
                         <UserCheck size={13} />
+
                         {offer.trader.completedOrders.toLocaleString()} orders
                       </span>
                     </div>
@@ -393,7 +464,7 @@ function P2PMarketplace() {
                     </p>
                   </div>
 
-                  {/* AMOUNT */}
+                  {/* AVAILABLE */}
                   <div>
                     <p className="text-xs font-medium text-slate-400">
                       Available
@@ -420,6 +491,7 @@ function P2PMarketplace() {
                   {/* ACTION */}
                   <div className="lg:text-right">
                     <Button
+                      type="button"
                       size="md"
                       className="w-full lg:min-w-28 lg:w-auto"
                     >
@@ -431,7 +503,7 @@ function P2PMarketplace() {
                   </div>
                 </div>
 
-                {/* BOTTOM INFORMATION */}
+                {/* PAYMENT + TERMS */}
                 <div className="mt-5 border-t border-slate-100 pt-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
