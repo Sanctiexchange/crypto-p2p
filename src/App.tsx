@@ -25,6 +25,7 @@ import MyAdvertisements from "./pages/merchant/MyAdvertisements";
 import EditAdvertisement from "./pages/merchant/EditAdvertisement";
 import MerchantOrders from "./pages/merchant/MerchantOrders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function App() {
   return (
@@ -112,6 +113,11 @@ function App() {
              path="/admin"
               element={<AdminDashboard />}
         />
+
+<Route
+  path="/admin/users"
+  element={<AdminUsers />}
+/>
 
         <Route
           path="/security"
