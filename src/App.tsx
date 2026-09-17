@@ -12,6 +12,7 @@ import Settings from "./pages/settings/Settings"
 import Security from "./pages/settings/Security";
 import OfferDetails from "./pages/P2P/OfferDetails";
 import TradeReview from "./pages/P2P/TradeReview";
+import OrderDetails from "./pages/orders/OrderDetails";
 
 function App() {
   return (
@@ -61,6 +62,11 @@ function App() {
         <Route
              path="/p2p/offer/:offerId/review"
              element={<TradeReview />}
+        />
+
+        <Route
+             path="/orders/:orderId"
+             element={<OrderDetails />}
         />
 
         <Route
