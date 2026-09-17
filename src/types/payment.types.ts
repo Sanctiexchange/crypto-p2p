@@ -10,4 +10,11 @@ export interface PaymentMethod {
   type: PaymentMethodType;
   name: string;
   displayName: string;
+
+  accountName?: string;
+  accountNumber?: string;
+  bankName?: string;
+
+  isDefault: boolean;
+  isActive: boolean;
 }
