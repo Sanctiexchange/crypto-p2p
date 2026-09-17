@@ -13,6 +13,7 @@ import Security from "./pages/settings/Security";
 import OfferDetails from "./pages/P2P/OfferDetails";
 import TradeReview from "./pages/P2P/TradeReview";
 import OrderDetails from "./pages/orders/OrderDetails";
+import PaymentMethods from "./pages/settings/PaymentMethods";
 
 function App() {
   return (
@@ -67,6 +68,11 @@ function App() {
         <Route
              path="/orders/:orderId"
              element={<OrderDetails />}
+        />
+
+        <Route
+           path="/payment-methods"
+            element={<PaymentMethods />}
         />
 
         <Route

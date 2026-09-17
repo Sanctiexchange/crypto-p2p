@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Wallet,
   X,
+  CreditCard,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -123,6 +124,21 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
             <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Account
             </p>
+
+             <NavLink
+                   to="/payment-methods"
+                   onClick={onClose}
+                   className={({ isActive }) =>
+                   `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
+              isActive
+                  ? "bg-blue-50 text-blue-600"
+                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+             }
+            >
+  <CreditCard size={19} />
+  Payment Methods
+</NavLink> 
 
             <NavLink
               to="/security"
