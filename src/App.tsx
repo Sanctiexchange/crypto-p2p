@@ -23,6 +23,7 @@ import MerchantDashboard from "./pages/merchant/MerchantDashboard";
 import CreateAdvertisement from "./pages/merchant/CreateAdvertisement";
 import MyAdvertisements from "./pages/merchant/MyAdvertisements";
 import EditAdvertisement from "./pages/merchant/EditAdvertisement";
+import MerchantOrders from "./pages/merchant/MerchantOrders";
 
 function App() {
   return (
@@ -98,6 +99,11 @@ function App() {
         <Route
              path="/merchant/ads/:advertisementId/edit"
              element={<EditAdvertisement />}
+        />
+
+        <Route
+          path="/merchant/orders"
+          element={<MerchantOrders />}
         />
 
         <Route
