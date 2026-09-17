@@ -24,6 +24,7 @@ import CreateAdvertisement from "./pages/merchant/CreateAdvertisement";
 import MyAdvertisements from "./pages/merchant/MyAdvertisements";
 import EditAdvertisement from "./pages/merchant/EditAdvertisement";
 import MerchantOrders from "./pages/merchant/MerchantOrders";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function App() {
   return (
@@ -104,6 +105,12 @@ function App() {
         <Route
           path="/merchant/orders"
           element={<MerchantOrders />}
+        />
+
+        {/* Admin */}
+        <Route
+             path="/admin"
+              element={<AdminDashboard />}
         />
 
         <Route
