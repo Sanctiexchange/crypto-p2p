@@ -21,7 +21,7 @@ import PaymentMethods from "./pages/settings/PaymentMethods";
 import Notifications from "./pages/notifications/Notifications";
 import MerchantDashboard from "./pages/merchant/MerchantDashboard";
 import CreateAdvertisement from "./pages/merchant/CreateAdvertisement";
-
+import MyAdvertisements from "./pages/merchant/MyAdvertisements";
 function App() {
   return (
     <Routes>
@@ -86,6 +86,11 @@ function App() {
         <Route
              path="/merchant/ads/create"
             element={<CreateAdvertisement />}
+        />
+
+        <Route
+            path="/merchant/ads"
+            element={<MyAdvertisements />}
         />
 
         <Route
