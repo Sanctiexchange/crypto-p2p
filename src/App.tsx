@@ -4,49 +4,78 @@ import MainLayout from "./components/layout/MainLayout";
 
 import Dashboard from "./pages/dashboard/Dashboard";
 import P2PMarketplace from "./pages/P2P/P2PMarketplace";
-import Orders from "./pages/orders/Orders";
-import Wallet from "./pages/wallet/Wallet";
-import Transactions from "./pages/transactions/Transactions";
-import Profile from "./pages/profile/Profile";
-import Settings from "./pages/settings/Settings"
-import Security from "./pages/settings/Security";
 import OfferDetails from "./pages/P2P/OfferDetails";
 import TradeReview from "./pages/P2P/TradeReview";
+
+import Orders from "./pages/orders/Orders";
 import OrderDetails from "./pages/orders/OrderDetails";
+
+import Wallet from "./pages/wallet/Wallet";
+import Transactions from "./pages/transactions/Transactions";
+
+import Profile from "./pages/profile/Profile";
+
+import Settings from "./pages/settings/Settings";
+import Security from "./pages/settings/Security";
 import PaymentMethods from "./pages/settings/PaymentMethods";
 
 function App() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path="/" element={<Dashboard />} />
+        {/* Dashboard */}
+        <Route
+          path="/"
+          element={<Dashboard />}
+        />
 
+        {/* P2P */}
         <Route
           path="/p2p"
           element={<P2PMarketplace />}
         />
 
         <Route
+          path="/p2p/offer/:offerId"
+          element={<OfferDetails />}
+        />
+
+        <Route
+          path="/p2p/offer/:offerId/review"
+          element={<TradeReview />}
+        />
+
+        {/* Orders */}
+        <Route
           path="/orders"
           element={<Orders />}
         />
 
         <Route
+          path="/orders/:orderId"
+          element={<OrderDetails />}
+        />
+
+        {/* Wallet */}
+        <Route
           path="/wallet"
           element={<Wallet />}
         />
 
+        {/* Transactions */}
         <Route
           path="/transactions"
           element={<Transactions />}
         />
 
+        {/* Account */}
         <Route
           path="/profile"
           element={<Profile />}
         />
+
         <Route
-          path="/settings/security"
+          path="/security"
           element={<Security />}
         />
 
@@ -55,29 +84,20 @@ function App() {
           element={<Settings />}
         />
 
-
         <Route
-          path="/p2p/offer/:offerId"
-          element={<OfferDetails />}
-        />
-        <Route
-             path="/p2p/offer/:offerId/review"
-             element={<TradeReview />}
+          path="/settings/payment-methods"
+          element={<PaymentMethods />}
         />
 
-        <Route
-             path="/orders/:orderId"
-             element={<OrderDetails />}
-        />
-
-        <Route
-           path="/payment-methods"
-            element={<PaymentMethods />}
-        />
-
+        {/* Unknown routes */}
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
         />
       </Route>
     </Routes>
