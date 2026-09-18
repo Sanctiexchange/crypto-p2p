@@ -26,6 +26,7 @@ import EditAdvertisement from "./pages/merchant/EditAdvertisement";
 import MerchantOrders from "./pages/merchant/MerchantOrders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminMerchants from "./pages/admin/AdminMerchants";
 
 function App() {
   return (
@@ -117,6 +118,11 @@ function App() {
 <Route
   path="/admin/users"
   element={<AdminUsers />}
+/>
+
+      <Route
+  path="/admin/merchants"
+  element={<AdminMerchants />}
 />
 
         <Route
