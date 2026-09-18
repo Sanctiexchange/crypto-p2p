@@ -29,6 +29,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminMerchants from "./pages/admin/AdminMerchants";
 import AdminAdvertisements from "./pages/admin/AdminAdvertisements";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminDisputes from "./pages/admin/AdminDisputes";
 
 function App() {
   return (
@@ -140,6 +141,11 @@ function App() {
 <Route
   path="/admin/orders"
   element={<AdminOrders />}
+/>
+
+<Route
+  path="/admin/disputes"
+  element={<AdminDisputes />}
 />
 
         <Route
