@@ -79,3 +79,38 @@ export function getAdvertisementById(
       item.id === advertisementId,
   );
 }
+
+export function updateAdvertisementStatus(
+  advertisementId: string,
+  status: P2PAdvertisement["status"],
+  rejectionReason?: string,
+): void {
+  const existing =
+    getAdvertisements();
+
+  const updated = existing.map(
+    (item) => {
+      if (
+        item.id !== advertisementId
+      ) {
+        return item;
+      }
+
+      return {
+        ...item,
+        status,
+        reviewedAt:
+          new Date().toISOString(),
+        rejectionReason:
+          status === "rejected"
+            ? rejectionReason
+            : undefined,
+      };
+    },
+  );
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(updated),
+  );
+}

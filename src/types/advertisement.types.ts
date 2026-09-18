@@ -3,19 +3,24 @@ import type {
   FiatCurrency,
 } from "./crypto.types";
 
-import type { PaymentMethodType } from "./payment.types";
+import type {
+  PaymentMethodType,
+} from "./payment.types";
 
 export type AdvertisementType =
   | "buy"
   | "sell";
 
 export type AdvertisementStatus =
-  | "active"
+  | "pending"
+  | "approved"
+  | "rejected"
   | "paused"
   | "completed";
 
 export interface P2PAdvertisement {
   id: string;
+
   merchantId: string;
 
   type: AdvertisementType;
@@ -37,4 +42,8 @@ export interface P2PAdvertisement {
   status: AdvertisementStatus;
 
   createdAt: string;
+
+  reviewedAt?: string;
+
+  rejectionReason?: string;
 }
