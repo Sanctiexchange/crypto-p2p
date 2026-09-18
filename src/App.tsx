@@ -131,6 +131,11 @@ function App() {
   element={<AdminAdvertisements />}
 />
 
+<Route
+  path="/admin/advertisements"
+  element={<AdminAdvertisements />}
+/>
+
         <Route
           path="/security"
           element={<Security />}

@@ -1,70 +1,113 @@
 import {
-  CheckCircle2,
+  CheckCircle,
+  Clock,
   Eye,
+  Filter,
   Megaphone,
-  PauseCircle,
-  PlayCircle,
+  Pause,
+  Play,
   Search,
   XCircle,
 } from "lucide-react";
 
 import { useMemo, useState } from "react";
 
-import Badge from "../../components/common/Badge";
-import Card from "../../components/common/Card";
+import { useNavigate } from "react-router-dom";
 
-import type {
-  P2PAdvertisement,
-} from "../../types/advertisement.types";
+import Badge from "../../components/common/Badge";
 
 import {
   getAdvertisements,
   updateAdvertisementStatus,
 } from "../../utility/advertisementStorage";
 
+import type {
+  P2PAdvertisement,
+} from "../../types/advertisement.types";
+
+import { adminMerchants } from "../../data/adminMerchants";
+
+type StatusFilter =
+  | "all"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "paused";
+
 function AdminAdvertisements() {
-  const [advertisements, setAdvertisements] =
-    useState<P2PAdvertisement[]>(
-      getAdvertisements(),
-    );
+  const navigate = useNavigate();
+
+  const [
+    advertisements,
+    setAdvertisements,
+  ] = useState<P2PAdvertisement[]>(
+    getAdvertisements(),
+  );
 
   const [search, setSearch] =
     useState("");
 
-  const [statusFilter, setStatusFilter] =
-    useState("all");
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState<StatusFilter>("all");
 
-  const [selectedAdvertisement, setSelectedAdvertisement] =
+  const [
+    selectedAdvertisement,
+    setSelectedAdvertisement,
+  ] =
     useState<P2PAdvertisement | null>(
       null,
     );
 
-  const refreshAdvertisements = () => {
-    setAdvertisements(
-      getAdvertisements(),
+  const getMerchantName = (
+    merchantId: string,
+  ) => {
+    const merchant =
+      adminMerchants.find(
+        (item) =>
+          item.id === merchantId,
+      );
+
+    return (
+      merchant?.displayName ??
+      "Unknown Merchant"
     );
   };
 
+  const refreshAdvertisements =
+    () => {
+      setAdvertisements(
+        getAdvertisements(),
+      );
+    };
+
   const filteredAdvertisements =
     useMemo(() => {
+      const query =
+        search.trim().toLowerCase();
+
       return advertisements.filter(
         (advertisement) => {
-          const searchValue =
-            search.toLowerCase();
+          const merchantName =
+            getMerchantName(
+              advertisement.merchantId,
+            );
 
           const matchesSearch =
+            !query ||
             advertisement.id
               .toLowerCase()
-              .includes(searchValue) ||
+              .includes(query) ||
             advertisement.crypto
               .toLowerCase()
-              .includes(searchValue) ||
+              .includes(query) ||
             advertisement.fiatCurrency
               .toLowerCase()
-              .includes(searchValue) ||
-            advertisement.merchantId
+              .includes(query) ||
+            merchantName
               .toLowerCase()
-              .includes(searchValue);
+              .includes(query);
 
           const matchesStatus =
             statusFilter === "all" ||
@@ -107,102 +150,47 @@ function AdminAdvertisements() {
         item.status === "paused",
     ).length;
 
-  const formatCurrency = (
-    amount: number,
-  ) =>
-    new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      maximumFractionDigits: 0,
-    }).format(amount);
-
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString(
-      "en-NG",
-      {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      },
-    );
-
-  const getStatusBadge = (
-    status: P2PAdvertisement["status"],
-  ) => {
-    switch (status) {
-      case "approved":
-        return (
-          <Badge variant="success">
-            Approved
-          </Badge>
-        );
-
-      case "pending":
-        return (
-          <Badge variant="warning">
-            Pending
-          </Badge>
-        );
-
-      case "rejected":
-        return (
-          <Badge variant="danger">
-            Rejected
-          </Badge>
-        );
-
-      case "paused":
-        return (
-          <Badge variant="neutral">
-            Paused
-          </Badge>
-        );
-
-      default:
-        return (
-          <Badge variant="info">
-            Completed
-          </Badge>
-        );
-    }
-  };
-
   const handleApprove = (
-    id: string,
+    advertisementId: string,
   ) => {
     updateAdvertisementStatus(
-      id,
+      advertisementId,
       "approved",
     );
 
     refreshAdvertisements();
+
+    setSelectedAdvertisement(null);
   };
 
   const handleReject = (
-    id: string,
+    advertisementId: string,
   ) => {
-    const reason = window.prompt(
-      "Enter a rejection reason:",
-    );
+    const reason =
+      window.prompt(
+        "Enter the reason for rejecting this advertisement:",
+      );
 
     if (!reason?.trim()) {
       return;
     }
 
     updateAdvertisementStatus(
-      id,
+      advertisementId,
       "rejected",
       reason.trim(),
     );
 
     refreshAdvertisements();
+
+    setSelectedAdvertisement(null);
   };
 
   const handlePause = (
-    id: string,
+    advertisementId: string,
   ) => {
     updateAdvertisementStatus(
-      id,
+      advertisementId,
       "paused",
     );
 
@@ -210,553 +198,683 @@ function AdminAdvertisements() {
   };
 
   const handleResume = (
-    id: string,
+    advertisementId: string,
   ) => {
     updateAdvertisementStatus(
-      id,
+      advertisementId,
       "approved",
     );
 
     refreshAdvertisements();
   };
 
+  const getStatusBadge = (
+    status: P2PAdvertisement["status"],
+  ) => {
+    if (status === "pending") {
+      return (
+        <Badge variant="warning">
+          Pending
+        </Badge>
+      );
+    }
+
+    if (status === "approved") {
+      return (
+        <Badge variant="success">
+          Approved
+        </Badge>
+      );
+    }
+
+    if (status === "rejected") {
+      return (
+        <Badge variant="danger">
+          Rejected
+        </Badge>
+      );
+    }
+
+    if (status === "paused") {
+      return (
+        <Badge variant="neutral">
+          Paused
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge variant="info">
+        Completed
+      </Badge>
+    );
+  };
+
+  const formatNumber = (
+    value: number,
+  ) =>
+    new Intl.NumberFormat(
+      "en-NG",
+    ).format(value);
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <Megaphone
+              size={22}
+              className="text-blue-600"
+            />
+
+            <span className="text-sm font-semibold text-blue-600">
+              Administration
+            </span>
+          </div>
+
           <h1 className="text-2xl font-bold text-slate-900">
-            Advertisement Approval
+            Advertisement Management
           </h1>
 
-          <Badge variant="info">
-            Admin
-          </Badge>
+          <p className="mt-1 text-sm text-slate-500">
+            Review and manage merchant P2P
+            advertisements.
+          </p>
         </div>
-
-        <p className="mt-1 text-sm text-slate-500">
-          Review and control advertisements submitted
-          by P2P merchants.
-        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-5">
-          <p className="text-sm text-slate-500">
-            Pending
-          </p>
+      {/* Statistics */}
 
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="rounded-lg bg-yellow-50 p-2 text-yellow-600">
+              <Clock size={19} />
+            </div>
+
+            <span className="text-xs font-semibold text-slate-400">
+              REVIEW
+            </span>
+          </div>
+
+          <p className="text-2xl font-bold text-slate-900">
             {pendingCount}
           </p>
 
-          <div className="mt-3 text-yellow-600">
-            <Megaphone size={20} />
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-sm text-slate-500">
-            Approved
+          <p className="mt-1 text-sm text-slate-500">
+            Pending
           </p>
+        </div>
 
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="rounded-lg bg-green-50 p-2 text-green-600">
+              <CheckCircle size={19} />
+            </div>
+
+            <span className="text-xs font-semibold text-slate-400">
+              LIVE
+            </span>
+          </div>
+
+          <p className="text-2xl font-bold text-slate-900">
             {approvedCount}
           </p>
 
-          <div className="mt-3 text-green-600">
-            <CheckCircle2 size={20} />
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-sm text-slate-500">
-            Rejected
+          <p className="mt-1 text-sm text-slate-500">
+            Approved
           </p>
+        </div>
 
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="rounded-lg bg-red-50 p-2 text-red-600">
+              <XCircle size={19} />
+            </div>
+
+            <span className="text-xs font-semibold text-slate-400">
+              BLOCKED
+            </span>
+          </div>
+
+          <p className="text-2xl font-bold text-slate-900">
             {rejectedCount}
           </p>
 
-          <div className="mt-3 text-red-600">
-            <XCircle size={20} />
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-sm text-slate-500">
-            Paused
+          <p className="mt-1 text-sm text-slate-500">
+            Rejected
           </p>
+        </div>
 
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+              <Pause size={19} />
+            </div>
+
+            <span className="text-xs font-semibold text-slate-400">
+              PAUSED
+            </span>
+          </div>
+
+          <p className="text-2xl font-bold text-slate-900">
             {pausedCount}
           </p>
 
-          <div className="mt-3 text-slate-500">
-            <PauseCircle size={20} />
-          </div>
-        </Card>
+          <p className="mt-1 text-sm text-slate-500">
+            Paused
+          </p>
+        </div>
       </div>
 
-      {/* Filters */}
-      <Card className="p-4">
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="relative">
+      {/* Search + Filters */}
+
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="relative flex-1">
             <Search
               size={18}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
 
             <input
+              type="text"
               value={search}
               onChange={(event) =>
                 setSearch(
                   event.target.value,
                 )
               }
-              placeholder="Search advertisement, crypto or merchant..."
-              className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              placeholder="Search by advertisement ID, crypto, fiat or merchant..."
+              className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(
-                event.target.value,
-              )
-            }
-            className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="all">
-              All Advertisement Status
-            </option>
+          <div className="flex items-center gap-2">
+            <Filter
+              size={18}
+              className="text-slate-500"
+            />
 
-            <option value="pending">
-              Pending
-            </option>
+            <select
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(
+                  event.target
+                    .value as StatusFilter,
+                )
+              }
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+            >
+              <option value="all">
+                All Statuses
+              </option>
 
-            <option value="approved">
-              Approved
-            </option>
+              <option value="pending">
+                Pending
+              </option>
 
-            <option value="rejected">
-              Rejected
-            </option>
+              <option value="approved">
+                Approved
+              </option>
 
-            <option value="paused">
-              Paused
-            </option>
+              <option value="rejected">
+                Rejected
+              </option>
 
-            <option value="completed">
-              Completed
-            </option>
-          </select>
+              <option value="paused">
+                Paused
+              </option>
+            </select>
+          </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Desktop */}
-      <Card className="hidden overflow-hidden md:block">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1050px]">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Advertisement
-                </th>
+      {/* Advertisement List */}
 
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Merchant
-                </th>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {filteredAdvertisements.length ===
+        0 ? (
+          <div className="px-6 py-16 text-center">
+            <Megaphone
+              size={40}
+              className="mx-auto text-slate-300"
+            />
 
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Price
-                </th>
+            <h3 className="mt-4 text-lg font-semibold text-slate-900">
+              No advertisements found
+            </h3>
 
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Limits
-                </th>
+            <p className="mt-1 text-sm text-slate-500">
+              There are no advertisements
+              matching your current filters.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Desktop */}
 
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Status
-                </th>
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr>
+                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Advertisement
+                    </th>
 
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Created
-                </th>
+                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Merchant
+                    </th>
 
-                <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Actions
-                </th>
-              </tr>
-            </thead>
+                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Price
+                    </th>
 
-            <tbody className="divide-y divide-slate-100">
-              {filteredAdvertisements.map(
-                (advertisement) => (
-                  <tr
-                    key={advertisement.id}
-                    className="hover:bg-slate-50"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                          <Megaphone
-                            size={19}
-                          />
-                        </div>
+                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Limits
+                    </th>
 
-                        <div>
-                          <p className="font-semibold text-slate-900">
-                            {advertisement.type.toUpperCase()}{" "}
-                            {advertisement.crypto}
+                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Status
+                    </th>
+
+                    <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-100">
+                  {filteredAdvertisements.map(
+                    (advertisement) => (
+                      <tr
+                        key={
+                          advertisement.id
+                        }
+                        className="transition hover:bg-slate-50"
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-600">
+                              {advertisement.crypto.charAt(
+                                0,
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="font-semibold text-slate-900">
+                                {advertisement.type ===
+                                "buy"
+                                  ? "Buy"
+                                  : "Sell"}{" "}
+                                {
+                                  advertisement.crypto
+                                }
+                              </p>
+
+                              <p className="text-xs text-slate-500">
+                                {
+                                  advertisement.id
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <p className="text-sm font-medium text-slate-900">
+                            {getMerchantName(
+                              advertisement.merchantId,
+                            )}
                           </p>
 
                           <p className="text-xs text-slate-500">
                             {
-                              advertisement.fiatCurrency
-                            }{" "}
-                            •{" "}
-                            {advertisement.id}
+                              advertisement.merchantId
+                            }
+                          </p>
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <p className="text-sm font-semibold text-slate-900">
+                            ₦
+                            {formatNumber(
+                              advertisement.price,
+                            )}
+                          </p>
+
+                          <p className="text-xs text-slate-500">
+                            per{" "}
+                            {
+                              advertisement.crypto
+                            }
+                          </p>
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <p className="text-sm text-slate-700">
+                            ₦
+                            {formatNumber(
+                              advertisement.minimumAmount,
+                            )}{" "}
+                            - ₦
+                            {formatNumber(
+                              advertisement.maximumAmount,
+                            )}
+                          </p>
+                        </td>
+
+                        <td className="px-5 py-4">
+                          {getStatusBadge(
+                            advertisement.status,
+                          )}
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() =>
+                                setSelectedAdvertisement(
+                                  advertisement,
+                                )
+                              }
+                              className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                              title="View"
+                            >
+                              <Eye
+                                size={17}
+                              />
+                            </button>
+
+                            {advertisement.status ===
+                              "pending" && (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    handleApprove(
+                                      advertisement.id,
+                                    )
+                                  }
+                                  className="rounded-lg bg-green-600 p-2 text-white transition hover:bg-green-700"
+                                  title="Approve"
+                                >
+                                  <CheckCircle
+                                    size={17}
+                                  />
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    handleReject(
+                                      advertisement.id,
+                                    )
+                                  }
+                                  className="rounded-lg bg-red-600 p-2 text-white transition hover:bg-red-700"
+                                  title="Reject"
+                                >
+                                  <XCircle
+                                    size={17}
+                                  />
+                                </button>
+                              </>
+                            )}
+
+                            {advertisement.status ===
+                              "approved" && (
+                              <button
+                                onClick={() =>
+                                  handlePause(
+                                    advertisement.id,
+                                  )
+                                }
+                                className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"
+                                title="Pause"
+                              >
+                                <Pause
+                                  size={17}
+                                />
+                              </button>
+                            )}
+
+                            {advertisement.status ===
+                              "paused" && (
+                              <button
+                                onClick={() =>
+                                  handleResume(
+                                    advertisement.id,
+                                  )
+                                }
+                                className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700"
+                                title="Resume"
+                              >
+                                <Play
+                                  size={17}
+                                />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ),
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile */}
+
+            <div className="divide-y divide-slate-100 lg:hidden">
+              {filteredAdvertisements.map(
+                (advertisement) => (
+                  <div
+                    key={
+                      advertisement.id
+                    }
+                    className="space-y-4 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-600">
+                          {advertisement.crypto.charAt(
+                            0,
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {advertisement.type ===
+                            "buy"
+                              ? "Buy"
+                              : "Sell"}{" "}
+                            {
+                              advertisement.crypto
+                            }
+                          </p>
+
+                          <p className="text-xs text-slate-500">
+                            {
+                              advertisement.id
+                            }
                           </p>
                         </div>
                       </div>
-                    </td>
 
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-semibold text-slate-900">
-                        {advertisement.merchantId}
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-semibold text-slate-900">
-                        {formatCurrency(
-                          advertisement.price,
-                        )}
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <p className="text-sm text-slate-700">
-                        {formatCurrency(
-                          advertisement.minimumAmount,
-                        )}
-                      </p>
-
-                      <p className="text-xs text-slate-500">
-                        to{" "}
-                        {formatCurrency(
-                          advertisement.maximumAmount,
-                        )}
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4">
                       {getStatusBadge(
                         advertisement.status,
                       )}
-                    </td>
+                    </div>
 
-                    <td className="px-5 py-4 text-sm text-slate-600">
-                      {formatDate(
-                        advertisement.createdAt,
+                    <div className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3">
+                      <div>
+                        <p className="text-xs text-slate-500">
+                          Merchant
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-slate-900">
+                          {getMerchantName(
+                            advertisement.merchantId,
+                          )}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-slate-500">
+                          Price
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                          ₦
+                          {formatNumber(
+                            advertisement.price,
+                          )}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-slate-500">
+                          Minimum
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-900">
+                          ₦
+                          {formatNumber(
+                            advertisement.minimumAmount,
+                          )}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-slate-500">
+                          Maximum
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-900">
+                          ₦
+                          {formatNumber(
+                            advertisement.maximumAmount,
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() =>
+                          setSelectedAdvertisement(
+                            advertisement,
+                          )
+                        }
+                        className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700"
+                      >
+                        <Eye size={16} />
+                        View
+                      </button>
+
+                      {advertisement.status ===
+                        "pending" && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleApprove(
+                                advertisement.id,
+                              )
+                            }
+                            className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white"
+                          >
+                            <CheckCircle
+                              size={16}
+                            />
+                            Approve
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleReject(
+                                advertisement.id,
+                              )
+                            }
+                            className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white"
+                          >
+                            <XCircle
+                              size={16}
+                            />
+                            Reject
+                          </button>
+                        </>
                       )}
-                    </td>
 
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-2">
+                      {advertisement.status ===
+                        "approved" && (
                         <button
                           onClick={() =>
-                            setSelectedAdvertisement(
-                              advertisement,
+                            handlePause(
+                              advertisement.id,
                             )
                           }
-                          className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
-                          title="View"
+                          className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700"
                         >
-                          <Eye size={17} />
+                          <Pause size={16} />
+                          Pause
                         </button>
+                      )}
 
-                        {advertisement.status ===
-                          "pending" && (
-                          <>
-                            <button
-                              onClick={() =>
-                                handleApprove(
-                                  advertisement.id,
-                                )
-                              }
-                              className="rounded-lg p-2 text-green-600 hover:bg-green-50"
-                              title="Approve"
-                            >
-                              <CheckCircle2
-                                size={17}
-                              />
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                handleReject(
-                                  advertisement.id,
-                                )
-                              }
-                              className="rounded-lg p-2 text-red-600 hover:bg-red-50"
-                              title="Reject"
-                            >
-                              <XCircle
-                                size={17}
-                              />
-                            </button>
-                          </>
-                        )}
-
-                        {advertisement.status ===
-                          "approved" && (
-                          <button
-                            onClick={() =>
-                              handlePause(
-                                advertisement.id,
-                              )
-                            }
-                            className="rounded-lg p-2 text-yellow-600 hover:bg-yellow-50"
-                            title="Pause"
-                          >
-                            <PauseCircle
-                              size={17}
-                            />
-                          </button>
-                        )}
-
-                        {advertisement.status ===
-                          "paused" && (
-                          <button
-                            onClick={() =>
-                              handleResume(
-                                advertisement.id,
-                              )
-                            }
-                            className="rounded-lg p-2 text-green-600 hover:bg-green-50"
-                            title="Resume"
-                          >
-                            <PlayCircle
-                              size={17}
-                            />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                      {advertisement.status ===
+                        "paused" && (
+                        <button
+                          onClick={() =>
+                            handleResume(
+                              advertisement.id,
+                            )
+                          }
+                          className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white"
+                        >
+                          <Play size={16} />
+                          Resume
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 ),
               )}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredAdvertisements.length ===
-          0 && (
-          <div className="p-10 text-center">
-            <Megaphone
-              size={32}
-              className="mx-auto text-slate-300"
-            />
-
-            <p className="mt-3 font-semibold text-slate-700">
-              No advertisements found
-            </p>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Try changing your search or filter.
-            </p>
-          </div>
-        )}
-      </Card>
-
-      {/* Mobile */}
-      <div className="space-y-3 md:hidden">
-        {filteredAdvertisements.map(
-          (advertisement) => (
-            <Card
-              key={advertisement.id}
-              className="p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-900">
-                    {advertisement.type.toUpperCase()}{" "}
-                    {advertisement.crypto}/
-                    {
-                      advertisement.fiatCurrency
-                    }
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-500">
-                    {advertisement.merchantId}
-                  </p>
-                </div>
-
-                {getStatusBadge(
-                  advertisement.status,
-                )}
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <p className="text-xs text-slate-500">
-                    Price
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {formatCurrency(
-                      advertisement.price,
-                    )}
-                  </p>
-                </div>
-
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <p className="text-xs text-slate-500">
-                    Available
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {
-                      advertisement.availableAmount
-                    }
-                  </p>
-                </div>
-
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <p className="text-xs text-slate-500">
-                    Minimum
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {formatCurrency(
-                      advertisement.minimumAmount,
-                    )}
-                  </p>
-                </div>
-
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <p className="text-xs text-slate-500">
-                    Maximum
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {formatCurrency(
-                      advertisement.maximumAmount,
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() =>
-                    setSelectedAdvertisement(
-                      advertisement,
-                    )
-                  }
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700"
-                >
-                  <Eye size={16} />
-                  View
-                </button>
-
-                {advertisement.status ===
-                  "pending" && (
-                  <>
-                    <button
-                      onClick={() =>
-                        handleApprove(
-                          advertisement.id,
-                        )
-                      }
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm font-semibold text-green-700"
-                    >
-                      <CheckCircle2
-                        size={16}
-                      />
-                      Approve
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        handleReject(
-                          advertisement.id,
-                        )
-                      }
-                      className="flex items-center justify-center rounded-lg bg-red-50 px-3 py-2 text-red-700"
-                    >
-                      <XCircle size={16} />
-                    </button>
-                  </>
-                )}
-
-                {advertisement.status ===
-                  "approved" && (
-                  <button
-                    onClick={() =>
-                      handlePause(
-                        advertisement.id,
-                      )
-                    }
-                    className="flex items-center justify-center rounded-lg bg-yellow-50 px-3 py-2 text-yellow-700"
-                  >
-                    <PauseCircle
-                      size={16}
-                    />
-                  </button>
-                )}
-
-                {advertisement.status ===
-                  "paused" && (
-                  <button
-                    onClick={() =>
-                      handleResume(
-                        advertisement.id,
-                      )
-                    }
-                    className="flex items-center justify-center rounded-lg bg-green-50 px-3 py-2 text-green-700"
-                  >
-                    <PlayCircle
-                      size={16}
-                    />
-                  </button>
-                )}
-              </div>
-            </Card>
-          ),
-        )}
-
-        {filteredAdvertisements.length ===
-          0 && (
-          <Card className="p-10 text-center">
-            <Megaphone
-              size={32}
-              className="mx-auto text-slate-300"
-            />
-
-            <p className="mt-3 font-semibold text-slate-700">
-              No advertisements found
-            </p>
-          </Card>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Details Modal */}
+      {/* Demo Notice */}
+
+      <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+        <p className="text-sm font-semibold text-blue-900">
+          Demo Administration Mode
+        </p>
+
+        <p className="mt-1 text-sm leading-6 text-blue-700">
+          Advertisement approval currently
+          uses localStorage. Backend
+          authorization, audit logs and
+          role-based access control will be
+          connected during backend
+          integration.
+        </p>
+      </div>
+
+      {/* Advertisement Modal */}
+
       {selectedAdvertisement && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-xl">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-200 p-5">
               <div>
-                <h2 className="font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900">
                   Advertisement Details
                 </h2>
 
-                <p className="text-xs text-slate-500">
-                  {selectedAdvertisement.id}
+                <p className="mt-1 text-xs text-slate-500">
+                  {
+                    selectedAdvertisement.id
+                  }
                 </p>
               </div>
 
@@ -772,24 +890,66 @@ function AdminAdvertisements() {
               </button>
             </div>
 
-            <div className="space-y-4 p-5">
-              <div className="flex flex-wrap gap-2">
+            <div className="space-y-5 p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xl font-bold text-slate-900">
+                    {selectedAdvertisement.type ===
+                    "buy"
+                      ? "Buy"
+                      : "Sell"}{" "}
+                    {
+                      selectedAdvertisement.crypto
+                    }
+                  </p>
+
+                  <p className="text-sm text-slate-500">
+                    {
+                      selectedAdvertisement.fiatCurrency
+                    }
+                  </p>
+                </div>
+
                 {getStatusBadge(
                   selectedAdvertisement.status,
                 )}
-
-                <Badge variant="info">
-                  {selectedAdvertisement.type.toUpperCase()}
-                </Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-lg bg-slate-50 p-4">
                   <p className="text-xs text-slate-500">
-                    Asset
+                    Merchant
                   </p>
 
-                  <p className="mt-1 font-bold text-slate-900">
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {getMerchantName(
+                      selectedAdvertisement.merchantId,
+                    )}
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">
+                    Price
+                  </p>
+
+                  <p className="mt-1 font-semibold text-slate-900">
+                    ₦
+                    {formatNumber(
+                      selectedAdvertisement.price,
+                    )}
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">
+                    Available
+                  </p>
+
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {formatNumber(
+                      selectedAdvertisement.availableAmount,
+                    )}{" "}
                     {
                       selectedAdvertisement.crypto
                     }
@@ -798,95 +958,60 @@ function AdminAdvertisements() {
 
                 <div className="rounded-lg bg-slate-50 p-4">
                   <p className="text-xs text-slate-500">
-                    Fiat
+                    Limits
                   </p>
 
-                  <p className="mt-1 font-bold text-slate-900">
-                    {
-                      selectedAdvertisement.fiatCurrency
-                    }
+                  <p className="mt-1 font-semibold text-slate-900">
+                    ₦
+                    {formatNumber(
+                      selectedAdvertisement.minimumAmount,
+                    )}{" "}
+                    - ₦
+                    {formatNumber(
+                      selectedAdvertisement.maximumAmount,
+                    )}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-slate-500">
-                  Price
-                </p>
-
-                <p className="mt-1 text-lg font-bold text-slate-900">
-                  {formatCurrency(
-                    selectedAdvertisement.price,
-                  )}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-500">
-                  Merchant
-                </p>
-
-                <p className="mt-1 font-semibold text-slate-900">
-                  {
-                    selectedAdvertisement.merchantId
-                  }
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-500">
-                  Order Limits
-                </p>
-
-                <p className="mt-1 text-sm text-slate-700">
-                  {formatCurrency(
-                    selectedAdvertisement.minimumAmount,
-                  )}{" "}
-                  —{" "}
-                  {formatCurrency(
-                    selectedAdvertisement.maximumAmount,
-                  )}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-semibold text-slate-900">
                   Payment Methods
                 </p>
 
                 <div className="mt-2 flex flex-wrap gap-2">
                   {selectedAdvertisement.paymentMethods.map(
                     (method) => (
-                      <Badge
+                      <span
                         key={method}
-                        variant="neutral"
+                        className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700"
                       >
                         {method}
-                      </Badge>
+                      </span>
                     ),
                   )}
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-slate-500">
-                  Terms
+                <p className="text-sm font-semibold text-slate-900">
+                  Merchant Terms
                 </p>
 
-                <p className="mt-1 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+                <div className="mt-2 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                   {
                     selectedAdvertisement.terms
                   }
-                </p>
+                </div>
               </div>
 
               {selectedAdvertisement.rejectionReason && (
-                <div className="rounded-lg border border-red-100 bg-red-50 p-3">
-                  <p className="text-xs font-semibold text-red-700">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                  <p className="text-sm font-semibold text-red-800">
                     Rejection Reason
                   </p>
 
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="mt-1 text-sm text-red-700">
                     {
                       selectedAdvertisement.rejectionReason
                     }
@@ -894,60 +1019,66 @@ function AdminAdvertisements() {
                 </div>
               )}
 
-              {selectedAdvertisement.status ===
-                "pending" && (
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => {
-                      handleApprove(
-                        selectedAdvertisement.id,
-                      );
-                      setSelectedAdvertisement(
-                        null,
-                      );
-                    }}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700"
-                  >
-                    <CheckCircle2
-                      size={17}
-                    />
-                    Approve
-                  </button>
+              <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 pt-4">
+                {selectedAdvertisement.status ===
+                  "pending" && (
+                  <>
+                    <button
+                      onClick={() =>
+                        handleReject(
+                          selectedAdvertisement.id,
+                        )
+                      }
+                      className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+                    >
+                      Reject
+                    </button>
 
+                    <button
+                      onClick={() =>
+                        handleApprove(
+                          selectedAdvertisement.id,
+                        )
+                      }
+                      className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
+                    >
+                      Approve Advertisement
+                    </button>
+                  </>
+                )}
+
+                {selectedAdvertisement.status ===
+                  "approved" && (
                   <button
-                    onClick={() => {
-                      handleReject(
+                    onClick={() =>
+                      handlePause(
                         selectedAdvertisement.id,
-                      );
-                      setSelectedAdvertisement(
-                        null,
-                      );
-                    }}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                      )
+                    }
+                    className="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700"
                   >
-                    <XCircle size={17} />
-                    Reject
+                    Pause Advertisement
                   </button>
-                </div>
-              )}
+                )}
+
+                {selectedAdvertisement.status ===
+                  "paused" && (
+                  <button
+                    onClick={() =>
+                      handleResume(
+                        selectedAdvertisement.id,
+                      )
+                    }
+                    className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    Resume Advertisement
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Demo Notice */}
-      <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-        <p className="text-sm font-semibold text-blue-900">
-          Admin Demo Mode
-        </p>
-
-        <p className="mt-1 text-xs leading-5 text-blue-700">
-          Advertisement approvals currently use
-          local browser storage. Backend authorization,
-          audit logs and permanent approval records
-          will be implemented during backend integration.
-        </p>
-      </div>
     </div>
   );
 }
