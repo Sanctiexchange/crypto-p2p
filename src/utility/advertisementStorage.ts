@@ -14,7 +14,31 @@ export function getAdvertisements(): P2PAdvertisement[] {
       return [];
     }
 
-    return JSON.parse(stored);
+    const advertisements =
+      JSON.parse(stored);
+
+    if (!Array.isArray(advertisements)) {
+      return [];
+    }
+
+    return advertisements.map(
+      (advertisement) => ({
+        ...advertisement,
+
+        /*
+         * Ads created before the approval
+         * system used "active".
+         *
+         * We convert those old demo ads to
+         * "approved" so existing data does
+         * not disappear from the application.
+         */
+        status:
+          advertisement.status === "active"
+            ? "approved"
+            : advertisement.status,
+      }),
+    );
   } catch {
     return [];
   }
@@ -41,12 +65,12 @@ export function updateAdvertisement(
   const existing =
     getAdvertisements();
 
-  const updated = existing.map(
-    (item) =>
+  const updated =
+    existing.map((item) =>
       item.id === advertisement.id
         ? advertisement
         : item,
-  );
+    );
 
   localStorage.setItem(
     STORAGE_KEY,
@@ -60,10 +84,11 @@ export function deleteAdvertisement(
   const existing =
     getAdvertisements();
 
-  const updated = existing.filter(
-    (item) =>
-      item.id !== advertisementId,
-  );
+  const updated =
+    existing.filter(
+      (item) =>
+        item.id !== advertisementId,
+    );
 
   localStorage.setItem(
     STORAGE_KEY,
@@ -88,8 +113,8 @@ export function updateAdvertisementStatus(
   const existing =
     getAdvertisements();
 
-  const updated = existing.map(
-    (item) => {
+  const updated =
+    existing.map((item) => {
       if (
         item.id !== advertisementId
       ) {
@@ -101,13 +126,13 @@ export function updateAdvertisementStatus(
         status,
         reviewedAt:
           new Date().toISOString(),
+
         rejectionReason:
           status === "rejected"
             ? rejectionReason
             : undefined,
       };
-    },
-  );
+    });
 
   localStorage.setItem(
     STORAGE_KEY,

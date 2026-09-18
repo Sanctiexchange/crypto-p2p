@@ -26,6 +26,7 @@ export interface P2PAdvertisement {
   type: AdvertisementType;
 
   crypto: CryptoSymbol;
+
   fiatCurrency: FiatCurrency;
 
   price: number;
@@ -33,6 +34,7 @@ export interface P2PAdvertisement {
   availableAmount: number;
 
   minimumAmount: number;
+
   maximumAmount: number;
 
   paymentMethods: PaymentMethodType[];
