@@ -9,6 +9,7 @@ export type OrderStatus =
 
 export interface P2POrder {
   id: string;
+
   orderNumber: string;
 
   offerId: string;
@@ -16,14 +17,17 @@ export interface P2POrder {
   tradeType: "buy" | "sell";
 
   crypto: string;
+
   fiatCurrency: string;
 
   cryptoAmount: number;
+
   fiatAmount: number;
 
   price: number;
 
   traderName: string;
+
   traderUsername: string;
 
   paymentMethod: string;
@@ -31,4 +35,15 @@ export interface P2POrder {
   status: OrderStatus;
 
   createdAt: string;
+
+  /**
+   * Admin dispute information.
+   */
+  disputeReason?: string;
+
+  disputedAt?: string;
+
+  resolvedAt?: string;
+
+  adminNote?: string;
 }
