@@ -34,6 +34,7 @@ import AdminFinance from "./pages/admin/AdminFinance";
 import AdminKyc from "./pages/admin/AdminKyc";
 import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
 import AdminPlatformSettings from "./pages/admin/AdminPlatformSettings";
+import AdminRoles from "./pages/admin/AdminRoles";
 
 function App() {
   return (
@@ -170,6 +171,11 @@ function App() {
 <Route
   path="/admin/platform-settings"
   element={<AdminPlatformSettings />}
+/>
+
+<Route
+  path="/admin/roles"
+  element={<AdminRoles />}
 />
 
         <Route

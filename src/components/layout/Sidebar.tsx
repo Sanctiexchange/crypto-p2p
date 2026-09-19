@@ -400,6 +400,32 @@ function Sidebar({
   )}
 </NavLink>
 
+{/* Admin Roles & Permissions */}
+<NavLink
+  to="/admin/roles"
+  onClick={onClose}
+  className={({ isActive }) =>
+    `flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
+      isActive
+        ? "bg-blue-50 text-blue-600"
+        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+    }`
+  }
+>
+  {({ isActive }) => (
+    <>
+      <span className="flex items-center gap-3">
+        <ShieldCheck size={19} />
+        Roles & Permissions
+      </span>
+
+      {isActive && (
+        <ChevronRight size={16} />
+      )}
+    </>
+  )}
+</NavLink>
+
             {/* Merchant */}
             <div className="my-5 border-t border-slate-100" />
 
