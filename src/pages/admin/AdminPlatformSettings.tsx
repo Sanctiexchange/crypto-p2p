@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
   BellRing,
@@ -531,7 +532,7 @@ function AdminPlatformSettings() {
 }
 
 interface ToggleSettingProps {
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   title: string;
   description: string;
   checked: boolean;

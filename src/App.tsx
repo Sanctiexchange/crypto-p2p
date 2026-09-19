@@ -33,6 +33,7 @@ import AdminDisputes from "./pages/admin/AdminDisputes";
 import AdminFinance from "./pages/admin/AdminFinance";
 import AdminKyc from "./pages/admin/AdminKyc";
 import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
+import AdminPlatformSettings from "./pages/admin/AdminPlatformSettings";
 
 function App() {
   return (
@@ -164,6 +165,11 @@ function App() {
 <Route
   path="/admin/audit-logs"
   element={<AdminAuditLogs />}
+/>
+
+<Route
+  path="/admin/platform-settings"
+  element={<AdminPlatformSettings />}
 />
 
         <Route
