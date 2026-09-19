@@ -32,6 +32,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminDisputes from "./pages/admin/AdminDisputes";
 import AdminFinance from "./pages/admin/AdminFinance";
 import AdminKyc from "./pages/admin/AdminKyc";
+import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
 
 function App() {
   return (
@@ -158,6 +159,11 @@ function App() {
 <Route
   path="/admin/kyc"
   element={<AdminKyc />}
+/>
+
+<Route
+  path="/admin/audit-logs"
+  element={<AdminAuditLogs />}
 />
 
         <Route
