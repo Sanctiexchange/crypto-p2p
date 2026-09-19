@@ -16,6 +16,7 @@ import {
   Store,
   WalletCards,
   UserCheck,
+  FileClock,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -337,6 +338,32 @@ function Sidebar({
       <span className="flex items-center gap-3">
         <UserCheck size={19} />
         KYC & Verification
+      </span>
+
+      {isActive && (
+        <ChevronRight size={16} />
+      )}
+    </>
+  )}
+</NavLink>
+
+{/* Admin Audit Logs */}
+<NavLink
+  to="/admin/audit-logs"
+  onClick={onClose}
+  className={({ isActive }) =>
+    `flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition ${
+      isActive
+        ? "bg-blue-50 text-blue-600"
+        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+    }`
+  }
+>
+  {({ isActive }) => (
+    <>
+      <span className="flex items-center gap-3">
+        <FileClock size={19} />
+        Audit Logs
       </span>
 
       {isActive && (
